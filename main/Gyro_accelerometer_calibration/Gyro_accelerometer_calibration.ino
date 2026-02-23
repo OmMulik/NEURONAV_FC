@@ -30,8 +30,8 @@ void setup() {
   Serial.read();  // Clear the input buffer
   
   //For all axis calibration
-  //calibrateGyro();
-  //calibrateAcc();
+  calibrateGyro();
+  calibrateAcc();
  
   //Simple calibration
   calibrateGyroSimple();
