@@ -339,30 +339,30 @@ AccZ -= AccZCalibration;
   AngleRoll=atan(AccY/sqrt(AccX*AccX+AccZ*AccZ))*57.29;
   AnglePitch=-atan(AccX/sqrt(AccY*AccY+AccZ*AccZ))*57.29;
 
-// // Inlined Kalman Filter computation in the loop
-// KalmanAngleRoll += t * RateRoll;
-// KalmanUncertaintyAngleRoll += t * t * 16; // Variance of IMU (4 deg/s) squared
-// KalmanGainRoll = KalmanUncertaintyAngleRoll / (KalmanUncertaintyAngleRoll + 9); // Error variance (3 deg) squared
-// KalmanAngleRoll += KalmanGainRoll * (AngleRoll - KalmanAngleRoll);
-// KalmanUncertaintyAngleRoll *= (1 - KalmanGainRoll);
+// Inlined Kalman Filter computation in the loop
+KalmanAngleRoll += t * RateRoll;
+KalmanUncertaintyAngleRoll += t * t * 16; // Variance of IMU (4 deg/s) squared
+KalmanGainRoll = KalmanUncertaintyAngleRoll / (KalmanUncertaintyAngleRoll + 9); // Error variance (3 deg) squared
+KalmanAngleRoll += KalmanGainRoll * (AngleRoll - KalmanAngleRoll);
+KalmanUncertaintyAngleRoll *= (1 - KalmanGainRoll);
 
-// // Set output for Roll Kalman
-// Kalman1DOutput[0] = KalmanAngleRoll;
-// Kalman1DOutput[1] = KalmanUncertaintyAngleRoll;
+// Set output for Roll Kalman
+Kalman1DOutput[0] = KalmanAngleRoll;
+Kalman1DOutput[1] = KalmanUncertaintyAngleRoll;
 
-// // Inlined Kalman Filter computation for Pitch
-// KalmanAnglePitch += t * RatePitch;
-// KalmanUncertaintyAnglePitch += t * t * 16; // Variance of IMU (4 deg/s) squared
-// KalmanGainPitch = KalmanUncertaintyAnglePitch / (KalmanUncertaintyAnglePitch + 9); // Error variance (3 deg) squared
-// KalmanAnglePitch += KalmanGainPitch * (AnglePitch - KalmanAnglePitch);
-// KalmanUncertaintyAnglePitch *= (1 - KalmanGainPitch);
+// Inlined Kalman Filter computation for Pitch
+KalmanAnglePitch += t * RatePitch;
+KalmanUncertaintyAnglePitch += t * t * 16; // Variance of IMU (4 deg/s) squared
+KalmanGainPitch = KalmanUncertaintyAnglePitch / (KalmanUncertaintyAnglePitch + 9); // Error variance (3 deg) squared
+KalmanAnglePitch += KalmanGainPitch * (AnglePitch - KalmanAnglePitch);
+KalmanUncertaintyAnglePitch *= (1 - KalmanGainPitch);
 
 // // Set output for Pitch Kalman
-// Kalman1DOutput[0] = KalmanAnglePitch;
-// Kalman1DOutput[1] = KalmanUncertaintyAnglePitch;
+Kalman1DOutput[0] = KalmanAnglePitch;
+Kalman1DOutput[1] = KalmanUncertaintyAnglePitch;
 
-// KalmanAngleRoll = (KalmanAngleRoll > 20) ? 20 : ((KalmanAngleRoll < -20) ? -20 : KalmanAngleRoll);
-// KalmanAnglePitch = (KalmanAnglePitch > 20) ? 20 : ((KalmanAnglePitch < -20) ? -20 : KalmanAnglePitch);
+KalmanAngleRoll = (KalmanAngleRoll > 20) ? 20 : ((KalmanAngleRoll < -20) ? -20 : KalmanAngleRoll);
+KalmanAnglePitch = (KalmanAnglePitch > 20) ? 20 : ((KalmanAnglePitch < -20) ? -20 : KalmanAnglePitch);
 
 
 complementaryAngleRoll=0.991*(complementaryAngleRoll+RateRoll*t) + 0.009*AngleRoll;
@@ -481,8 +481,8 @@ PrevItermRateYaw = ItermYaw;
   }
 
 
-// int ThrottleIdle = 1150;
-// int ThrottleCutOff = 1000;
+int ThrottleIdle = 1150;
+int ThrottleCutOff = 1000;
   if (MotorInput1 < ThrottleIdle)
   {
     MotorInput1 = ThrottleIdle;
@@ -524,97 +524,97 @@ mot4.writeMicroseconds(MotorInput4);
 
 
 //Reciever signals
-  // Serial.print(ReceiverValue[0]);
-  // Serial.print(" ");
-  // Serial.print(ReceiverValue[1]);
-  // Serial.print(" ");
-  // Serial.print(ReceiverValue[2]);
-  // Serial.print(" ");
-  // Serial.print(ReceiverValue[3]);
-  // Serial.print(" ");
+  Serial.print(ReceiverValue[0]);
+  Serial.print(" ");
+  Serial.print(ReceiverValue[1]);
+   Serial.print(" ");
+   Serial.print(ReceiverValue[2]);
+   Serial.print(" ");
+   Serial.print(ReceiverValue[3]);
+   Serial.print(" ");
  
-  // Serial.print(ReceiverValue[4]);
-  // Serial.print(" - ");
-  // Serial.print(ReceiverValue[5]);
-  // Serial.print(" - ");
+   Serial.print(ReceiverValue[4]);
+   Serial.print(" - ");
+   Serial.print(ReceiverValue[5]);
+   Serial.print(" - ");
 
 // //Motor PWMs in us
-//   Serial.print("MotVals-");
-  // Serial.print(MotorInput1);
-  // Serial.print("  ");
-  // Serial.print(MotorInput2);
-  // Serial.print("  ");
-  // Serial.print(MotorInput3);
-  // Serial.print("  ");
+   Serial.print("MotVals-");
+   Serial.print(MotorInput1);
+   Serial.print("  ");
+   Serial.print(MotorInput2);
+   Serial.print("  ");
+   Serial.print(MotorInput3);
+ Serial.print("  ");
   // Serial.print(MotorInput4);
   // Serial.println(" ");
 
 // //Reciever translated rates
-//   Serial.print(DesiredRateRoll);
-//   Serial.print("  ");
-//   Serial.print(DesiredRatePitch);
-//   Serial.print("  ");
-//   Serial.print(DesiredRateYaw);
-//   Serial.print(" -- ");
+  Serial.print(DesiredRateRoll);
+  Serial.print("  ");
+  Serial.print(DesiredRatePitch);
+  Serial.print("  ");
+  Serial.print(DesiredRateYaw);
+  Serial.print(" -- ");
 
-// // //IMU values
-  // Serial.print("Acc values: ");
-  // Serial.print("AccX:");
-  // Serial.print(AccX);
-  // Serial.print("  ");
-  // Serial.print("AccY:");
-  // Serial.print(AccY);
-  // Serial.print("  ");
-  // Serial.print("AccZ:");
-  // Serial.print(AccZ);
-  // Serial.print(" -- ");
-  // Print the gyroscope values
-  // Serial.print("Gyro values: ");
-  // Serial.print(RateRoll);
-  // Serial.print("  ");
-  // Serial.print(RatePitch);
-  // Serial.print("  ");
-  // Serial.print(RateYaw);
-  // Serial.print("  ");
-  // Serial.print(" -- ");
+// //IMU values
+  Serial.print("Acc values: ");
+  Serial.print("AccX:");
+  Serial.print(AccX);
+  Serial.print("  ");
+  Serial.print("AccY:");
+  Serial.print(AccY);
+  Serial.print("  ");
+  Serial.print("AccZ:");
+  Serial.print(AccZ);
+  Serial.print(" -- ");
+ // Print the gyroscope values
+  Serial.print("Gyro values: ");
+  Serial.print(RateRoll);
+  Serial.print("  ");
+  Serial.print(RatePitch);
+  Serial.print("  ");
+  Serial.print(RateYaw);
+  Serial.print("  ");
+  Serial.print(" -- ");
 
 //PID outputs
-// Serial.print("PID O/P ");
-// Serial.print(InputPitch);
-//   Serial.print("  ");
-// Serial.print(InputRoll);
-//   Serial.print("  ");
-// Serial.print(InputYaw);
-//   Serial.print(" -- ");
+Serial.print("PID O/P ");
+Serial.print(InputPitch);
+  Serial.print("  ");
+Serial.print(InputRoll);
+  Serial.print("  ");
+Serial.print(InputYaw);
+  Serial.print(" -- ");
 
 //Angles from MPU
-  // Serial.print("AngleRoll:");
-  // Serial.print(AngleRoll);
-  // //serial.print("  ");
-  //   Serial.print("AnglePitch:");
-  // Serial.print(AnglePitch);
+  Serial.print("AngleRoll:");
+  Serial.print(AngleRoll);
+  //serial.print("  ");
+    Serial.print("AnglePitch:");
+  Serial.print(AnglePitch);
 
-  // Serial.print("KalmanAngleRoll:");
-  // Serial.print(KalmanAngleRoll);
-  // //serial.print("  ");
-  //   Serial.print("KalmanAnglePitch:");
-  // Serial.print(KalmanAnglePitch);
+  Serial.print("KalmanAngleRoll:");
+  Serial.print(KalmanAngleRoll);
+  //serial.print("  ");
+    Serial.print("KalmanAnglePitch:");
+  Serial.print(KalmanAnglePitch);
 
-  // Serial.print("ComplementaryAngleRoll: ");
-  // Serial.print(complementaryAngleRoll);
-  // Serial.print("ComplementaryAnglePitch: ");
-  // Serial.print(complementaryAnglePitch);
+  Serial.print("ComplementaryAngleRoll: ");
+  Serial.print(complementaryAngleRoll);
+  Serial.print("ComplementaryAnglePitch: ");
+  Serial.print(complementaryAnglePitch);
 
-  // Serial.println(" ");  
+  Serial.println(" ");  
 
-  //  serial plotter comparison
-  // Serial.print(KalmanAngleRoll);
-  // Serial.print(" ");
-  // Serial.print(KalmanAnglePitch);
-  // Serial.print(" ");
-  // Serial.print(complementaryAngleRoll);
-  // Serial.print(" ");
-  // Serial.println(complementaryAnglePitch);
+   //serial plotter comparison
+  Serial.print(KalmanAngleRoll);
+  Serial.print(" ");
+  Serial.print(KalmanAnglePitch);
+  Serial.print(" ");
+  Serial.print(complementaryAngleRoll);
+  Serial.print(" ");
+  Serial.println(complementaryAnglePitch);
 
   while (micros() - LoopTimer < (t*1000000));
   {
