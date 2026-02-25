@@ -273,12 +273,12 @@ int led_time=100;
   delay(500);
 
 
-RateCalibrationRoll=0.27;
-RateCalibrationPitch=-0.85;
-RateCalibrationYaw=-2.09;
-AccXCalibration=0.03;
+RateCalibrationRoll=-0.90;
+RateCalibrationPitch=6.05;
+RateCalibrationYaw=-0.34;
+AccXCalibration=0.02;
 AccYCalibration=0.01;
-AccZCalibration=-0.07;
+AccZCalibration=0.02;
 
 LoopTimer = micros();
 
@@ -540,8 +540,8 @@ mot4.writeMicroseconds(MotorInput4);
    Serial.print("  ");
    Serial.print(MotorInput3);
  Serial.print("  ");
-  // Serial.print(MotorInput4);
-  // Serial.println(" ");
+  Serial.print(MotorInput4);
+  Serial.println(" ");
 
 // //Reciever translated rates
   Serial.print(DesiredRateRoll);
