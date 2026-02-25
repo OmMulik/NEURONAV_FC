@@ -267,7 +267,7 @@ void loop()
   while (micros() - LoopTimer < 4000);
   {
      LoopTimer = micros();
-    //  Serial.print(LoopTimer);
+     Serial.print(LoopTimer);
   }
 
 
