@@ -140,7 +140,11 @@ void channelInterruptHandler()
   }
 }
 
-int normalize(int val, int in_min, int in_max){ if(val < in_min) val = in_min; if(val > in_max) val = in_max; return 1000 + (val - in_min) * 1000 / (in_max - in_min); }
+int normalize(int val, int in_min, int in_max)
+  { 
+  if(val < in_min) val = in_min; if(val > in_max) val = in_max; 
+  return 1000 + (val - in_min) * 1000 / (in_max - in_min); 
+  }
 
 
 
