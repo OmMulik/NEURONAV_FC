@@ -13,6 +13,9 @@ float calAccX, calAccY, calAccZ;
 
 void setup() {
   Serial.begin(115200);
+  while (!Serial) {
+    delay(10);
+  }
   Wire.begin();
   
   // Initialize the MPU6050 sensor
@@ -105,7 +108,7 @@ AccZ -= AccZCalibration;
   Serial.print(", GyroZ: ");
   Serial.println(RateYaw);
 
-  delay(1); // Delay for 100ms before reading again
+  delay(100); // Delay for 100ms before reading again
 }
 
 void gyro_signals(void) {
