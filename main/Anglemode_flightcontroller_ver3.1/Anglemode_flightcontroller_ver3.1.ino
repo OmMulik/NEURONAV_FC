@@ -76,7 +76,7 @@ volatile float PIDOutputYaw;
 volatile float KalmanGainPitch;
 volatile float KalmanGainRoll;
 
-int ThrottleIdle = 1300;
+int ThrottleIdle = 1100;
 int ThrottleCutOff = 1000;
 
 volatile float DesiredRateRoll, DesiredRatePitch, DesiredRateYaw;
@@ -385,7 +385,7 @@ int yawRaw      = ReceiverValue[3];
 // Map them into a consistent 1000–2000us scale
 rollRaw     = map(rollRaw, 1112, 1889, 1000, 2000);
 pitchRaw    = map(pitchRaw, 1215, 1851, 1000, 2000);
-throttleRaw = map(throttleRaw, 1179, 1840, 1000, 2000);
+throttleRaw = map(throttleRaw, 1160, 1840, 1000, 2000);
 yawRaw      = map(yawRaw, 1094, 1850, 1000, 2000);
 
 // Constrain them to safe bounds
@@ -405,10 +405,6 @@ DesiredAnglePitch = 0.05 * (pitchRaw - 1500);
 InputThrottle     = throttleRaw;
 DesiredRateYaw    = 0.15 * (yawRaw - 1500);
 
-Serial.print("R: "); Serial.print(rollRaw);
-Serial.print(" P: "); Serial.print(pitchRaw);
-Serial.print(" T: "); Serial.print(throttleRaw);
-Serial.print(" Y: "); Serial.println(yawRaw);
 
 
 
@@ -449,7 +445,7 @@ PIDOutputRoll = PtermRoll + ItermRoll + DtermRoll;
 PIDOutputRoll = (PIDOutputRoll > 400) ? 400 : ((PIDOutputRoll < -400) ? -400 : PIDOutputRoll);
 
 // Update output and previous values for Roll
-InputRoll = PIDOutputRoll;
+InputRoll = 0.2*(rollRaw - 1500);
 PrevErrorRateRoll = ErrorRateRoll;
 PrevItermRateRoll = ItermRoll;
 
@@ -462,7 +458,7 @@ PIDOutputPitch = PtermPitch + ItermPitch + DtermPitch;
 PIDOutputPitch = (PIDOutputPitch > 400) ? 400 : ((PIDOutputPitch < -400) ? -400 : PIDOutputPitch);
 
 // Update output and previous values for Pitch
-InputPitch = PIDOutputPitch;
+InputPitch = 0;
 PrevErrorRatePitch = ErrorRatePitch;
 PrevItermRatePitch = ItermPitch;
 
@@ -476,7 +472,7 @@ PIDOutputYaw = (PIDOutputYaw > 400) ? 400 : ((PIDOutputYaw < -400) ? -400 : PIDO
 
 
 // Update output and previous values for Yaw
-InputYaw = PIDOutputYaw;
+InputYaw = 0;
 PrevErrorRateYaw = ErrorRateYaw;
 PrevItermRateYaw = ItermYaw;
 
@@ -485,6 +481,7 @@ PrevItermRateYaw = ItermYaw;
   {
     InputThrottle = 1800;
   }
+  Serial.println(InputThrottle);
 
   
   MotorInput1 =  (InputThrottle - InputRoll - InputPitch - InputYaw); // front right - counter clockwise
@@ -557,99 +554,6 @@ mot2.writeMicroseconds(MotorInput2);
 mot3.writeMicroseconds(MotorInput3);
 mot4.writeMicroseconds(MotorInput4);
 
-
-//Reciever signals
-  // Serial.print(ReceiverValue[0]);
-  // Serial.print(" ");
-  // Serial.print(ReceiverValue[1]);
-  // Serial.print(" ");
-  // Serial.print(ReceiverValue[2]);
-  // Serial.print(" ");
-  // Serial.print(ReceiverValue[3]);
-  // Serial.print(" ");
- 
-  // Serial.print(ReceiverValue[4]);
-  // Serial.print(" - ");
-  // Serial.print(ReceiverValue[5]);
-  // Serial.print(" - ");
-
-// //Motor PWMs in us
-//   Serial.print("MotVals-");
-  // Serial.print(MotorInput1);
-  // Serial.print("  ");
-  // Serial.print(MotorInput2);
-  // Serial.print("  ");
-  // Serial.print(MotorInput3);
-  // Serial.print("  ");
-  // Serial.print(MotorInput4);
-  // Serial.println(" ");
-
-// //Reciever translated rates
-//   Serial.print(DesiredRateRoll);
-//   Serial.print("  ");
-//   Serial.print(DesiredRatePitch);
-//   Serial.print("  ");
-//   Serial.print(DesiredRateYaw);
-//   Serial.print(" -- ");
-
-// // //IMU values
-  // Serial.print("Acc values: ");
-  // Serial.print("AccX:");
-  // Serial.print(AccX);
-  // Serial.print("  ");
-  // Serial.print("AccY:");
-  // Serial.print(AccY);
-  // Serial.print("  ");
-  // Serial.print("AccZ:");
-  // Serial.print(AccZ);
-  // Serial.print(" -- ");
-  // Print the gyroscope values
-  // Serial.print("Gyro values: ");
-  // Serial.print(RateRoll);
-  // Serial.print("  ");
-  // Serial.print(RatePitch);
-  // Serial.print("  ");
-  // Serial.print(RateYaw);
-  // Serial.print("  ");
-  // Serial.print(" -- ");
-
-//PID outputs
-// Serial.print("PID O/P ");
-// Serial.print(InputPitch);
-//   Serial.print("  ");
-// Serial.print(InputRoll);
-//   Serial.print("  ");
-// Serial.print(InputYaw);
-//   Serial.print(" -- ");
-
-//Angles from MPU
-  // Serial.print("AngleRoll:");
-  // Serial.print(AngleRoll);
-  // //serial.print("  ");
-  //   Serial.print("AnglePitch:");
-  // Serial.print(AnglePitch);
-
-  // Serial.print("KalmanAngleRoll:");
-  // Serial.print(KalmanAngleRoll);
-  // //serial.print("  ");
-  //   Serial.print("KalmanAnglePitch:");
-  // Serial.print(KalmanAnglePitch);
-
-  // Serial.print("ComplementaryAngleRoll: ");
-  // Serial.print(complementaryAngleRoll);
-  // Serial.print("ComplementaryAnglePitch: ");
-  // Serial.print(complementaryAnglePitch);
-
-  // Serial.println(" ");  
-
-  //  serial plotter comparison
-  // Serial.print(KalmanAngleRoll);
-  // Serial.print(" ");
-  // Serial.print(KalmanAnglePitch);
-  // Serial.print(" ");
-  // Serial.print(complementaryAngleRoll);
-  // Serial.print(" ");
-  // Serial.println(complementaryAnglePitch);
 
   while (micros() - LoopTimer < (t*1000000)) {}
   LoopTimer = micros();
