@@ -275,12 +275,13 @@ int led_time=100;
   delay(500);
 
 
-RateCalibrationRoll=-0.90;
-RateCalibrationPitch=6.05;
-RateCalibrationYaw=-0.34;
-AccXCalibration=0.02;
-AccYCalibration=0.01;
-AccZCalibration=0.02;
+RateCalibrationRoll=-1.16;
+RateCalibrationPitch=5.30;
+RateCalibrationYaw=-0.25;
+AccXCalibration=-0.02;
+AccYCalibration=-0.02;
+AccZCalibration=0.01;
+
 
 LoopTimer = micros();
 
@@ -650,9 +651,7 @@ mot4.writeMicroseconds(MotorInput4);
   // Serial.print(" ");
   // Serial.println(complementaryAnglePitch);
 
-  while (micros() - LoopTimer < (t*1000000));
-   {
-     LoopTimer = micros();
-   }
+  while (micros() - LoopTimer < (t*1000000)) {}
+  LoopTimer = micros();
 
 }
