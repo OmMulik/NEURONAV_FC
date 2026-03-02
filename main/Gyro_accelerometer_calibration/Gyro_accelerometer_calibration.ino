@@ -33,6 +33,7 @@ void setup() {
   Serial.read();  // Clear the input buffer
   
   //For all axis calibration
+  delay(5000);
   calibrateGyro();
   calibrateAcc();
  
@@ -156,6 +157,7 @@ void gyro_signals(void) {
   AccY = (float)AccYLSB / 4096;
   AccZ = (float)AccZLSB / 4096;
   
+  
   // // Calculate Roll and Pitch angles using accelerometer data
   // AngleRoll = atan(AccY / sqrt(AccX * AccX + AccZ * AccZ)) * 57.29; // Convert to degrees
   // AnglePitch = -atan(AccX / sqrt(AccY * AccY + AccZ * AccZ)) * 57.29; // Convert to degrees
@@ -194,21 +196,23 @@ void calibrateAcc()
 
 void calibrateGyro()
 {
-    for (RateCalibrationNumber = 0; RateCalibrationNumber < 1000; RateCalibrationNumber++)
+  RateCalibrationRoll = 0;
+  RateCalibrationPitch = 0;
+  RateCalibrationYaw = 0;
+
+  for (RateCalibrationNumber = 0; RateCalibrationNumber < 4000; RateCalibrationNumber++)
   {
     gyro_signals();
     RateCalibrationRoll += RateRoll;
     RateCalibrationPitch += RatePitch;
     RateCalibrationYaw += RateYaw;
-    AccZCalibration +=  AccZ;
 
-    delay(1);
+    delayMicroseconds(500);
   }
-  RateCalibrationRoll /= 1000;
-  RateCalibrationPitch /= 1000;
-  RateCalibrationYaw /= 1000;
-  AccZCalibration /=1000;
-  AccZCalibration = AccZCalibration-1 ;
+
+  RateCalibrationRoll /= 4000.0;
+  RateCalibrationPitch /= 4000.0;
+  RateCalibrationYaw /= 4000.0;
 }
 
 void calibrateGyroSimple()
@@ -223,8 +227,7 @@ void calibrateGyroSimple()
     AccYCalibration +=  AccY;
     AccZCalibration +=  AccZ;
 
-    delay(1);
-  }
+    delayMicroseconds(500);  }
   RateCalibrationRoll /= 2000;
   RateCalibrationPitch /= 2000;
   RateCalibrationYaw /= 2000;
