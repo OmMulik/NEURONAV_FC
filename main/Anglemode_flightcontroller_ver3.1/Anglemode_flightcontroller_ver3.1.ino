@@ -15,17 +15,17 @@ float PAngleRoll=2; float PAnglePitch=PAngleRoll;
 float IAngleRoll=0.5; float IAnglePitch=IAngleRoll;
 float DAngleRoll=0.007; float DAnglePitch=DAngleRoll;
 
-float PRateRoll = 0.3;
-float IRateRoll = 0.8;
-float DRateRoll = 0.003;
+float PRateRoll = 0.15;
+float IRateRoll = 0.0;
+float DRateRoll = 0.0;
 
 float PRatePitch = PRateRoll;
 float IRatePitch = IRateRoll;
 float DRatePitch = DRateRoll;
 
-float PRateYaw = 2;
-float IRateYaw = 1;
-float DRateYaw = 0;
+float PRateYaw = 0.4;
+float IRateYaw = 0.0;
+float DRateYaw = 0.0;
 
 uint32_t LoopTimer;
 float t=0.004;      //time cycle
@@ -240,6 +240,26 @@ int led_time=100;
   Wire.write(0x00);
   Wire.endTransmission();
 
+  // ---- MPU6050 Configuration ----
+
+// Set Digital Low Pass Filter
+Wire.beginTransmission(0x68);
+Wire.write(0x1A);
+Wire.write(0x03);     // DLPF setting
+Wire.endTransmission();
+
+// Set Gyro Range ±500 deg/s
+Wire.beginTransmission(0x68);
+Wire.write(0x1B);
+Wire.write(0x08);
+Wire.endTransmission();
+
+// Set Accel Range ±8g
+Wire.beginTransmission(0x68);
+Wire.write(0x1C);
+Wire.write(0x10);
+Wire.endTransmission();
+
  	ESP32PWM::allocateTimer(0);
 	ESP32PWM::allocateTimer(1);
 	ESP32PWM::allocateTimer(2);
@@ -275,12 +295,12 @@ int led_time=100;
   delay(500);
 
 
-RateCalibrationRoll=-1.16;
-RateCalibrationPitch=5.30;
-RateCalibrationYaw=-0.25;
-AccXCalibration=-0.02;
-AccYCalibration=-0.02;
-AccZCalibration=0.01;
+RateCalibrationRoll=-1.14;
+RateCalibrationPitch=5.63;
+RateCalibrationYaw=-0.13;
+AccXCalibration=-0.01;
+AccYCalibration=-0.01;
+AccZCalibration=0.02;
 
 
 LoopTimer = micros();
@@ -292,17 +312,9 @@ void loop(void) {
 
   //enter your loop code here
 Wire.beginTransmission(0x68);
-  Wire.write(0x1A);
-  Wire.write(0x05);
-  Wire.endTransmission();
-  Wire.beginTransmission(0x68);
-  Wire.write(0x1C);
-  Wire.write(0x10);
-  Wire.endTransmission();
-  Wire.beginTransmission(0x68);
-  Wire.write(0x3B);
-  Wire.endTransmission(); 
-  Wire.requestFrom(0x68,6);
+Wire.write(0x3B);
+Wire.endTransmission();
+Wire.requestFrom(0x68,6);
   int16_t AccXLSB = Wire.read() << 8 | Wire.read();
   int16_t AccYLSB = Wire.read() << 8 | Wire.read();
   int16_t AccZLSB = Wire.read() << 8 | Wire.read();
@@ -332,6 +344,12 @@ RateYaw -= RateCalibrationYaw;
 AccX -= AccXCalibration ;
 AccY -= AccYCalibration ;
 AccZ -= AccZCalibration;
+
+Serial.print("RawPitch: ");
+Serial.print(GyroY / 65.5);   // before subtraction
+
+Serial.print(" | AfterSub: ");
+Serial.println(RatePitch);    // after subtraction
 
   AngleRoll=atan(AccY/sqrt(AccX*AccX+AccZ*AccZ))*57.29;
   AnglePitch=-atan(AccX/sqrt(AccY*AccY+AccZ*AccZ))*57.29;
@@ -445,7 +463,7 @@ PIDOutputRoll = PtermRoll + ItermRoll + DtermRoll;
 PIDOutputRoll = (PIDOutputRoll > 400) ? 400 : ((PIDOutputRoll < -400) ? -400 : PIDOutputRoll);
 
 // Update output and previous values for Roll
-InputRoll = 0.2*(rollRaw - 1500);
+InputRoll  = 0.2*(rollRaw -1500);
 PrevErrorRateRoll = ErrorRateRoll;
 PrevItermRateRoll = ItermRoll;
 
@@ -472,7 +490,7 @@ PIDOutputYaw = (PIDOutputYaw > 400) ? 400 : ((PIDOutputYaw < -400) ? -400 : PIDO
 
 
 // Update output and previous values for Yaw
-InputYaw = 0;
+InputYaw   = 0;
 PrevErrorRateYaw = ErrorRateYaw;
 PrevItermRateYaw = ItermYaw;
 
@@ -481,8 +499,6 @@ PrevItermRateYaw = ItermYaw;
   {
     InputThrottle = 1800;
   }
-  Serial.println(InputThrottle);
-
   
   MotorInput1 =  (InputThrottle - InputRoll - InputPitch - InputYaw); // front right - counter clockwise
   MotorInput2 =  (InputThrottle - InputRoll + InputPitch + InputYaw); // rear right - clockwise
@@ -549,7 +565,7 @@ PrevItermRateYaw = ItermYaw;
   }
 
 // Calculate motor control values directly
- mot1.writeMicroseconds(MotorInput1);
+mot1.writeMicroseconds(MotorInput1);
 mot2.writeMicroseconds(MotorInput2);
 mot3.writeMicroseconds(MotorInput3);
 mot4.writeMicroseconds(MotorInput4);
