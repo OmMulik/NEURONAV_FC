@@ -1,6 +1,6 @@
 #define NUM_CHANNELS 6
 #define PPM_PIN 9
-#define FRAME_LENGTH 30000
+#define FRAME_LENGTH 22500
 #define PULSE_LENGTH 300
 
 volatile uint16_t pwmValue[NUM_CHANNELS] = {1500,1500,1500,1500,1500,1500};
@@ -41,15 +41,38 @@ void loop() {
 void isr0(){ readPWM(0); }
 void isr1(){ readPWM(1); }
 
-ISR(PCINT2_vect){
-  uint8_t current = PIND;
-  uint8_t changed = current ^ lastPortD;
-  lastPortD = current;
+ISR(TIMER1_COMPA_vect)
+{
+  static bool pulseState = false;
+  static uint8_t channel = 0;
+  static uint32_t sum = 0;
 
-  for(int i=2; i<6; i++){
-    if(changed & (1 << (i+2))){
-      readPWM(i);
+  if (pulseState)
+  {
+    // End of short LOW pulse → go HIGH
+    PORTB |= (1 << 1);  // D9 HIGH
+    pulseState = false;
+
+    if (channel < NUM_CHANNELS)
+    {
+      uint16_t val = constrain(pwmValue[channel], 1000, 2000);
+      OCR1A = (val - PULSE_LENGTH) * 2;
+      sum += val;
+      channel++;
     }
+    else
+    {
+      OCR1A = (FRAME_LENGTH - sum) * 2;
+      sum = 0;
+      channel = 0;
+    }
+  }
+  else
+  {
+    // Start short LOW pulse
+    PORTB &= ~(1 << 1);  // D9 LOW
+    OCR1A = PULSE_LENGTH * 2;
+    pulseState = true;
   }
 }
 
@@ -68,27 +91,4 @@ void setupTimer1(){
   TCCR1B |= (1 << CS11);  // prescaler 8 (0.5µs tick)
   OCR1A = 100;
   TIMSK1 |= (1 << OCIE1A);
-}
-
-ISR(TIMER1_COMPA_vect){
-  static uint8_t channel = 0;
-  static uint32_t frameSum = 0;
-
-PORTB &= ~(1 << 1);  // D9 LOW (PB1)
-OCR1A = PULSE_LENGTH * 2;
-
-  if(channel < NUM_CHANNELS){
-    uint16_t val = constrain(pwmValue[channel],1000,2000);
-    // simple smoothing
-    static uint16_t lastVal[NUM_CHANNELS] = {1500};
-    val = (lastVal[channel] * 3 + val) / 4;
-    lastVal[channel] = val;
-    OCR1A = (val - PULSE_LENGTH) * 2;
-    frameSum += val;
-    channel++;
-  } else {
-    OCR1A = (FRAME_LENGTH - frameSum) * 2;
-    frameSum = 0;
-    channel = 0;
-  }
 }
