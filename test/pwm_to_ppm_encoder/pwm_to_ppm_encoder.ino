@@ -1,6 +1,6 @@
 #define NUM_CHANNELS 6
 #define PPM_PIN 9
-#define FRAME_LENGTH 22500
+#define FRAME_LENGTH 21000
 #define PULSE_LENGTH 300
 
 volatile uint16_t pwmValue[NUM_CHANNELS] = {1500,1500,1500,1500,1500,1500};
@@ -8,7 +8,7 @@ volatile uint32_t riseTime[NUM_CHANNELS];
 
 volatile uint8_t lastPortD = 0;
 
-const uint8_t inputPins[NUM_CHANNELS] = {2,3,4,5,6,7};
+const uint8_t inputPins[NUM_CHANNELS] = {7,6,5,4,3,2};
 
 void setup() {
   Serial.begin(115200);
@@ -56,6 +56,9 @@ ISR(TIMER1_COMPA_vect)
     if (channel < NUM_CHANNELS)
     {
       uint16_t val = constrain(pwmValue[channel], 1000, 2000);
+
+      if(val > 1495 && val < 1505)
+    val = 1500;
       OCR1A = (val - PULSE_LENGTH) * 2;
       sum += val;
       channel++;
@@ -80,7 +83,8 @@ void readPWM(uint8_t ch){
   if(digitalRead(inputPins[ch])){
     riseTime[ch] = micros();
   } else {
-    pwmValue[ch] = micros() - riseTime[ch];
+    uint16_t val = micros() - riseTime[ch];
+    pwmValue[ch] = (pwmValue[ch] * 3 + val) / 4;
   }
 }
 
