@@ -1,53 +1,69 @@
-//Channel 1 = analog input 0
-//Channel 2 = analog input 1
-//Channel 3 = analog input 2
-//Channel 4 = analog input 3
-//Channel 5 = analog input 4
-//Channel 6 = analog input 5
-//PPM output = output 2
+// PWM input pins (Receiver)
+#define CH1  A0
+#define CH2  A1
+#define CH3  A2
+#define CH4  A3
+#define CH5  A4
+#define CH6  A5
 
-int delay_counter;
+// PPM output pin
+#define PPM_PIN 2
 
-void setup(){
-  TIMSK0 &= ~_BV(TOIE0);          //Disable timer0 as it will consume a lot of time.
-  pinMode(2, OUTPUT);             //Pin 2 will be the PPM output.
-  while(PINC & B00000001);        //While analog input 0 is low.
+uint16_t ch[6];
+uint16_t ch_filtered[6];
+
+const uint16_t PPM_PULSE = 300;     // PPM pulse length
+const uint16_t FRAME_LENGTH = 20000; // 20ms frame
+
+void setup()
+{
+  pinMode(CH1, INPUT);
+  pinMode(CH2, INPUT);
+  pinMode(CH3, INPUT);
+  pinMode(CH4, INPUT);
+  pinMode(CH5, INPUT);
+  pinMode(CH6, INPUT);
+
+  pinMode(PPM_PIN, OUTPUT);
 }
 
-void loop(){
-  //Channel 1
-  while(!(PINC & B00000001));     //While analog input 0 is low.
-  PORTD |= B00000100;             //Set output 2 high.
-  delayMicroseconds(100);         //Delay for 100 us.
-  PORTD &= B11111011;             //Set output 2 low.
-  //Channel 2
-  while(!(PINC & B00000010));     //While analog input 1 is low.
-  PORTD |= B00000100;             //Set output 2 high.
-  delayMicroseconds(100);         //Delay for 100 us.
-  PORTD &= B11111011;             //Set output 2 low.
-  //Channel 3
-  while(!(PINC & B00000100));     //While analog input 2 is low.
-  PORTD |= B00000100;             //Set output 2 high.
-  delayMicroseconds(100);         //Delay for 100 us.
-  PORTD &= B11111011;             //Set output 2 low.
-  //Channel 4
-  while(!(PINC & B00001000));     //While analog input 3 is low.
-  PORTD |= B00000100;             //Set output 2 high.
-  delayMicroseconds(100);         //Delay for 100 us.
-  PORTD &= B11111011;             //Set output 2 low.
-  //Channel 5
-  while(!(PINC & B00010000));     //While analog input 4 is low.
-  PORTD |= B00000100;             //Set output 2 high.
-  delayMicroseconds(100);         //Delay for 100 us.
-  PORTD &= B11111011;             //Set output 2 low.
-  //Channel 6
-  while(!(PINC & B00100000));     //While analog input 5 is low.
-  PORTD |= B00000100;             //Set output 2 high.
-  delayMicroseconds(100);         //Delay for 100 us.
-  PORTD &= B11111011;             //Set output 2 low.
-  //Stop pulse
-  while(PINC & B00100000);        //While analog input 5 is high.
-  PORTD |= B00000100;             //Set output 2 high.
-  delayMicroseconds(100);         //Delay for 100 us.
-  PORTD &= B11111011;             //Set output 2 low.
+void loop()
+{
+  // Read PWM from receiver
+  ch[0] = pulseIn(CH1, HIGH, 25000);
+  ch[1] = pulseIn(CH2, HIGH, 25000);
+  ch[2] = pulseIn(CH3, HIGH, 25000);
+  ch[3] = pulseIn(CH4, HIGH, 25000);
+  ch[4] = pulseIn(CH5, HIGH, 25000);
+  ch[5] = pulseIn(CH6, HIGH, 25000);
+
+  // Simple smoothing filter
+  for(int i=0;i<6;i++)
+  {
+    ch_filtered[i] = (ch_filtered[i]*3 + ch[i]) / 4;
+  }
+
+  generatePPM();
+}
+
+void generatePPM()
+{
+  uint32_t frame_time = 0;
+
+  for(int i=0;i<6;i++)
+  {
+    digitalWrite(PPM_PIN, HIGH);
+    delayMicroseconds(PPM_PULSE);
+    digitalWrite(PPM_PIN, LOW);
+
+    delayMicroseconds(ch_filtered[i] - PPM_PULSE);
+    frame_time += ch_filtered[i];
+  }
+
+  // Sync pulse
+  digitalWrite(PPM_PIN, HIGH);
+  delayMicroseconds(PPM_PULSE);
+  digitalWrite(PPM_PIN, LOW);
+
+  delayMicroseconds(FRAME_LENGTH - frame_time);
 }
