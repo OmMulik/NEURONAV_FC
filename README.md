@@ -27,3 +27,6 @@ ESC control using PWM signals
 Custom designed PCB flight controller
 Motor mixing for quadcopter X configuration
 Real-time debugging through serial monitor
+
+References used for this project: Joop Brokking : https://www.youtube.com/@Joop_Brokking
+                                  Carbon Aeronautics : https://www.youtube.com/@carbonaeronautics
